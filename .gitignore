@@ -1,0 +1,6 @@
+/venv
+*.xlsx
+./DB/E-commerce_2020-2022_og.xlsx
+/DB
+Proyect/backend/__pycache__/
+

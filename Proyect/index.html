@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard bodega Alianza</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+
+        .body {
+            background-color: rgba(23, 42, 58);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: auto auto;
+            background-color: rgba(23, 42, 58);
+            padding: 1%;
+        }
+
+        .grid-item {
+            padding: 2%;
+            font-size: 2vw;
+            text-align: center;
+        }
+
+        .chartMenu {
+            width: auto;
+            height: auto;
+            background: rgba(23, 42, 58);
+            color: rgb(183, 227, 204);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chartMenu p {
+            padding: 1%;
+            font-size: 1.5vw;
+        }
+
+        .chartBoxPie {
+            height: auto;
+            width: auto;
+            border-radius: 10px;
+            border: solid 0.15vw rgba(54, 162, 235, 1);
+            background: white;
+            padding: 1%;
+            margin-right: 1%;
+        }
+
+        .infoBox {
+            width: 100%;
+            padding: 2%;
+            border-radius: 10px;
+            border: solid 0.15vw rgba(54, 162, 235, 1);
+            background: white;
+            margin-bottom: 20px;
+        }
+
+        .cont {
+            display: flex;
+        }
+
+        .chartBox {
+            height: 85%;
+            width: auto;
+            padding: 2%;
+            border-radius: 10px;
+            border: solid 0.15vw rgba(54, 162, 235, 1);
+            background: white;
+        }
+
+        .chartBoxProduct {
+            width: auto;
+            padding: 2%;
+            border-radius: 10px;
+            border: solid 0.15vw rgba(54, 162, 235, 1);
+            background: white;
+        }
+
+        .chartBoxLine {
+            width: auto;
+            height: auto;
+            padding: 2%;
+            border-radius: 10px;
+            border: solid 0.15vw rgba(54, 162, 235, 1);
+            background: white;
+        }
+
+        .chartBoxLine {
+            height: 40vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title h2::before {
+            content: "$";
+        }
+
+        .chartButtons button {
+            width: 80px;
+            height: 30px;
+            border: none;
+            border-radius: 5px;
+            margin: 0.5%;
+            cursor: pointer;
+            font-size: 1vw;
+            background-color: rgba(54, 162, 235, 1);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chartMenu">
+        <h1>Dashboard Bodega Alianza</h1>
+    </div>
+    <div class="grid-container">
+        <div class="grid-item">
+            <div class="cont">
+                <div class="chartBoxPie">
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <div class="container">
+                    <div class="infoBox">
+                            <h5>2020:</h5>
+                            <h2 id="d2020" style="color:rgb(90, 177, 187)"></h2>
+                    </div>
+                    <div class="infoBox">
+                            <h5>2021:</h5>
+                            <h2 id="d2021" style="color:rgb(133, 203, 51)"></h2>
+                    </div>
+                    <div class="infoBox">
+                            <h5>2022:</h5>
+                            <h2 id="d2022" style="color:rgb(244, 184, 96)"></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid-item">
+            <div class="chartBoxLine">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+        <div class="grid-item">
+            <div class="chartBox">
+                <canvas id="myChart"></canvas>
+            </div>
+            <div class="chartButtons">
+                <button onclick="stockData(0)">2020</button>
+                <button onclick="stockData(1)">2021</button>
+                <button onclick="stockData(2)">2022</button>
+            </div>
+        </div>
+        <div class="grid-item">
+            <div class="chartBoxProduct">
+                <select id="selectorProductos">
+                    <!-- Las opciones del selector se generarán dinámicamente -->
+                </select>
+                <canvas id="grafica"></canvas>
+            </div>
+        </div>
+        <div class="grid-item">
+            <div class="chartBox">
+                <canvas id="CodigosPostales"></canvas>
+            </div>
+            <div class="chartButtons">
+                <button onclick="stockDataCP(0)">2020</button>
+                <button onclick="stockDataCP(1)">2021</button>
+                <button onclick="stockDataCP(2)">2022</button>
+            </div>
+        </div>
+        <div class="grid-item" style="display: flex; flex-direction: column; align-items: center;">
+            <br>
+            <br>
+            <br>
+            <br>
+            <img src="/logo" alt="Bodgas Alianza" style="width: 300px;">
+            <h6 style="color: grey; margin-top: auto; text-align: right;">Powered by: Cruz, Pérez and Viniegra</h6>
+        </div>
+        
+        
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        //-----------Variables---------------------------------------------------------
+
+        const rutaPie = 'http://localhost:8081/ventasAnuales'; //cambiar a ventas anuales
+        const rutaMensual = 'http://localhost:8081/ventasMensuales'; //cambiar a ventas mensuales
+        const rutaTop = 'http://localhost:8081/Top10Porductos'; //cambiar a top de productos
+        const rutaProductos = 'http://localhost:8081/Todos'; //cambiar a todos los productos
+        const rutaTopCP = 'http://localhost:8081/Top10codigosPostales';
+
+        // ---------Ventas de cada año (Grafica de pie)---------------------------------
+        const dataPie = {
+            labels: ['2020', '2021', '2022'],
+            datasets: [{
+                label: 'Venta anual',
+                data: [],
+                backgroundColor: [
+                    'rgb(90, 177, 187)',
+                    'rgb(133, 203, 51)',
+                    'rgb(244, 184, 96)'
+                ],
+                hoverOffset: 4
+            }]
+        };
+
+        // Obtenemos los datos del archivo JSON
+
+        fetch(rutaPie)
+            .then(response => response.json())
+            .then(data => {
+                // Actualizamos la variable ventasTotales con los datos obtenidos
+                dataPie.datasets[0].data = data.VentasTotales.map(item => item.total);
+                //Saca el total del json de cada año
+                const data2020 = data.VentasTotales[0].total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+                const data2021 = data.VentasTotales[1].total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+                const data2022 = data.VentasTotales[2].total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+
+                document.getElementById("d2020").innerHTML = data2020;
+                document.getElementById("d2021").innerHTML = data2021;
+                document.getElementById("d2022").innerHTML = data2022;
+
+                // Configuration
+                const configPie = {
+                    type: 'doughnut',
+                    data: dataPie,
+                    options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Venta anual'
+                            }
+                        }
+                    }
+                };
+
+                // Render init block
+                const pieChart = new Chart(
+                    document.getElementById("pieChart"),
+                    configPie
+                );
+            })
+            .catch(error => console.error(error));
+
+        // ---------Ventas de cada año (Gráfica de línea)--------------------------------
+        fetch(rutaMensual)
+            .then(response => response.json())
+            .then(data => {
+                const years = Object.keys(data.VentasMensuales);
+                const months = data.VentasMensuales[years[0]].map(entry => entry.month);
+                const datasets = years.map(year => ({
+                    label: year,
+                    data: data.VentasMensuales[year].map(entry => entry.total),
+                    borderColor: ['rgb(90, 177, 187)', 'rgb(133, 203, 51)', 'rgb(244, 184, 96)'],
+                    fill: false
+                }));
+
+                // data block
+                const lineChartData = {
+                    labels: months,
+                    datasets: datasets
+                };
+
+                const ctx = document.getElementById('lineChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: lineChartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Ventas de cada año'
+                            }
+                        }
+                    }
+                });
+            });
+
+        // --------------------- Top de productos -------------------------------------
+
+        //fetch
+        function stockData(val) {
+            async function stockDataFetch() {
+                const response = await fetch(rutaTop);
+                //espera para que la petición se complete
+                const datapoints = await response.json();
+                console.log(datapoints);
+                return datapoints;
+            }
+
+            stockDataFetch().then(datapoints => {
+                const productos = datapoints.ventasTotales[val].producto.map(index => index.nombre);
+
+                const ventas = datapoints.ventasTotales[val].producto.map(index => index.unidades_vendidas);
+
+
+                myChart.config.data.labels = productos;
+                myChart.config.data.datasets[0].data = ventas;
+
+                myChart.update();
+            });
+        }
+
+        //data
+        const dataProductos = {
+            labels: ['Enero', 'Febreo', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', "Septiembre", 'Octubre', 'Noviembre', 'Diciembre'],
+            taget: '2021',
+            datasets: [{
+                label: 'Top 10 de cantidades generadas de productos',
+                data: [7, 8, 9, 10, 11, 12, 3, 5, 2, 3, 3, 11],
+                borderWidth: 1,
+                backgroundColor: 'rgb(209, 73, 91)'
+            }]
+        };
+
+        //Configuration
+        const config = {
+            data: dataProductos,
+            type: 'bar',
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Cantidad generada por producto'
+                    }
+                }
+            }
+        };
+        //Render init block
+
+        const myChart = new Chart(
+            document.getElementById("myChart"),
+            config
+        );
+        stockData(0);
+
+        // --------------------Selección de productos------------------------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            const selector = document.getElementById('selectorProductos');
+            const canvas = document.getElementById('grafica');
+            const ctx = canvas.getContext('2d');
+            let chart; // Variable para guardar la instancia de la gráfica
+            let pr1; // Variable para guardar el valor del selector
+
+            // Cargar los datos del archivo JSON
+            fetch(rutaProductos)
+                .then(response => response.json())
+                .then(data => {
+                    const ventasTotales = data.ventasTotales;
+
+                    ventasTotales.forEach(venta => {
+                        const productos = venta.producto;
+
+                        productos.forEach(producto => {
+                            const option = document.createElement('option');
+                            option.value = producto.nombre;
+                            option.textContent = producto.nombre;
+                            selector.appendChild(option);
+                        });
+                    });
+
+                    // Inicializar la gráfica con los datos del primer producto
+                    const firstProduct = ventasTotales[0].producto[0];
+                    pr1 = firstProduct.nombre; // Guardar el valor del primer producto en la variable pr1
+                    updateChart(pr1);
+                });
+
+            // Función para actualizar la gráfica con los datos del producto seleccionado
+            function updateChart(selectedProduct) {
+                // Obtener los datos del producto seleccionado
+                fetch(rutaProductos)
+                    .then(response => response.json())
+                    .then(data => {
+                        const ventasTotales = data.ventasTotales;
+
+                        let selectedData = [];
+
+                        ventasTotales.forEach(venta => {
+                            const productos = venta.producto;
+
+                            productos.forEach(producto => {
+                                if (producto.nombre === selectedProduct) {
+                                    selectedData.push(producto.unidades_vendidas);
+                                }
+                            });
+                        });
+
+                        // Actualizar los datos de la gráfica
+                        if (chart) {
+                            chart.destroy(); // Destruir la instancia previa de la gráfica
+                        }
+
+                        chart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: ['2020', '2021', '2022'],
+                                datasets: [{
+                                    label: selectedProduct,
+                                    data: selectedData,
+                                    backgroundColor: "rgb(90, 67, 187)",
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                },
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Unidades vendidas de producto por año'
+                                    }
+                                }
+                            }
+                        });
+                    });
+            }
+
+            // Evento change para actualizar la gráfica cuando se selecciona un producto
+            selector.addEventListener('change', () => {
+                pr1 = selector.value; // Actualizar el valor de pr1 al seleccionar un nuevo producto
+                updateChart(pr1);
+                console.log(pr1);
+            });
+        });
+        // --------------------- Top de Codigos Postales -------------------------------------
+
+        //fetch
+        function stockDataCP(val) {
+            async function stockDataFetchCP() {
+                const response = await fetch(rutaTopCP);
+                //espera para que la petición se complete
+                const datapoints = await response.json();
+                console.log(datapoints);
+                return datapoints;
+            }
+
+            stockDataFetchCP().then(datapoints => {
+                const productos = datapoints.ventasTotales[val].producto.map(index => index.CP);
+
+                const ventas = datapoints.ventasTotales[val].producto.map(index => index.unidades_vendidas);
+
+
+                CodigosPostales.config.data.labels = productos;
+                CodigosPostales.config.data.datasets[0].data = ventas;
+
+                CodigosPostales.update();
+            });
+        }
+
+        //data
+        const dataProductosCP = {
+            labels: ['Enero', 'Febreo', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', "Septiembre", 'Octubre', 'Noviembre', 'Diciembre'],
+            taget: '2021',
+            datasets: [{
+                label: 'Top 10 de Facturas por CP',
+                data: [7, 8, 9, 10, 11, 12, 3, 5, 2, 3, 3, 11],
+                borderWidth: 1,
+                backgroundColor: 'rgb(6, 214, 160)'
+            }]
+        };
+
+        //Configuration
+        const configCP = {
+            data: dataProductosCP,
+            type: 'bar',
+            options: {
+                indexAxis: 'y',
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Cantidad generada por producto'
+                    }
+                }
+            }
+        };
+        //Render init block
+
+        const CodigosPostales = new Chart(
+            document.getElementById("CodigosPostales"),
+            configCP
+        );
+        stockDataCP(0);
+
+    </script>
+
+</body>
+
+</html>
