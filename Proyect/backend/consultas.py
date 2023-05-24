@@ -57,13 +57,12 @@ def TotalVentasMensuales():
 
 def TodosLosProductos():
     cursor = conexion.cursor()
-    # cursor.execute(""" SELECT YEAR(facturas.fecha) AS año, articulos.descripcion AS producto,ROUND(SUM(ventas.importe),2) AS total
-    #                     FROM facturas, ventas, articulos
-    #                     WHERE facturas.num_factura = ventas.num_factura
-    #                     AND ventas.id_articulo = articulos.id_articulo
-    #                     GROUP BY YEAR(facturas.fecha), articulos.descripcion
-    #                     ORDER BY articulos.descripcion, YEAR(facturas.fecha);""")
-    cursor.execute("SELECT * from productos")
+    cursor.execute(""" SELECT YEAR(facturas.fecha) AS año, articulos.descripcion AS producto,ROUND(SUM(ventas.importe),2) AS total
+                        FROM facturas, ventas, articulos
+                        WHERE facturas.num_factura = ventas.num_factura
+                        AND ventas.id_articulo = articulos.id_articulo
+                        GROUP BY YEAR(facturas.fecha), articulos.descripcion
+                        ORDER BY articulos.descripcion, YEAR(facturas.fecha);""")
     productos = cursor.fetchall()
     cursor.close()
 
@@ -87,20 +86,19 @@ def TodosLosProductos():
                 
 def Top10Productos():
     cursor = conexion.cursor()
-    # cursor.execute(""" SELECT año, producto, total
-    #                     FROM (
-    #                         SELECT YEAR(facturas.fecha) AS año,
-    #                             articulos.descripcion AS producto,
-    #                             ROUND(SUM(ventas.importe),2) AS total,
-    #                             ROW_NUMBER() OVER (PARTITION BY YEAR(facturas.fecha) ORDER BY SUM(ventas.importe) DESC) AS rn
-    #                         FROM facturas
-    #                         JOIN ventas ON facturas.num_factura = ventas.num_factura
-    #                         JOIN articulos ON ventas.id_articulo = articulos.id_articulo
-    #                         GROUP BY YEAR(facturas.fecha), articulos.descripcion
-    #                     ) subquery
-    #                     WHERE rn <= 10
-    #                     ORDER BY año, total DESC;""")
-    cursor.execute("SELECT * FROM `top10`")
+    cursor.execute(""" SELECT año, producto, total
+                        FROM (
+                            SELECT YEAR(facturas.fecha) AS año,
+                                articulos.descripcion AS producto,
+                                ROUND(SUM(ventas.importe),2) AS total,
+                                ROW_NUMBER() OVER (PARTITION BY YEAR(facturas.fecha) ORDER BY SUM(ventas.importe) DESC) AS rn
+                            FROM facturas
+                            JOIN ventas ON facturas.num_factura = ventas.num_factura
+                            JOIN articulos ON ventas.id_articulo = articulos.id_articulo
+                            GROUP BY YEAR(facturas.fecha), articulos.descripcion
+                        ) subquery
+                        WHERE rn <= 10
+                        ORDER BY año, total DESC;""")
     productos = cursor.fetchall()
     cursor.close()
 
@@ -125,39 +123,38 @@ def Top10Productos():
 
 def codigosPostales():
     cursor = conexion.cursor()
-    # cursor.execute(""" SELECT año, codigo_postal, vendido
-    #                     FROM (
-    #                         SELECT YEAR(facturas.fecha) as año,  facturas.codigo_postal AS codigo_postal, ROUND(SUM(ventas.importe),2) AS vendido
-    #                         FROM ventas, facturas
-    #                         WHERE ventas.num_factura = facturas.num_factura
-    #                         AND YEAR(facturas.fecha) = "2020"
-    #                         GROUP BY codigo_postal 
-    #                         ORDER BY vendido DESC 
-    #                         LIMIT 10
-    #                     ) AS veinte
-    #                     UNION
-    #                     SELECT año, codigo_postal, vendido
-    #                     FROM (
-    #                         SELECT YEAR(facturas.fecha) as año,  facturas.codigo_postal AS codigo_postal, ROUND(SUM(ventas.importe),2) AS vendido
-    #                         FROM ventas, facturas
-    #                         WHERE ventas.num_factura = facturas.num_factura
-    #                         AND YEAR(facturas.fecha) = "2021"
-    #                         GROUP BY codigo_postal 
-    #                         ORDER BY vendido DESC 
-    #                         LIMIT 10
-    #                     ) AS veintiuno
-    #                     UNION
-    #                     SELECT año, codigo_postal, vendido
-    #                     FROM (
-    #                         SELECT YEAR(facturas.fecha) as año,  facturas.codigo_postal AS codigo_postal, ROUND(SUM(ventas.importe),2) AS vendido
-    #                         FROM ventas, facturas
-    #                         WHERE ventas.num_factura = facturas.num_factura
-    #                         AND YEAR(facturas.fecha) = "2022"
-    #                         GROUP BY codigo_postal 
-    #                         ORDER BY vendido DESC 
-    #                         LIMIT 10
-    #                     ) AS veintidos;""")
-    cursor.execute("SELECT * FROM `codigos_postales`")
+    cursor.execute(""" SELECT año, codigo_postal, vendido
+                        FROM (
+                            SELECT YEAR(facturas.fecha) as año,  facturas.codigo_postal AS codigo_postal, ROUND(SUM(ventas.importe),2) AS vendido
+                            FROM ventas, facturas
+                            WHERE ventas.num_factura = facturas.num_factura
+                            AND YEAR(facturas.fecha) = "2020"
+                            GROUP BY codigo_postal 
+                            ORDER BY vendido DESC 
+                            LIMIT 10
+                        ) AS veinte
+                        UNION
+                        SELECT año, codigo_postal, vendido
+                        FROM (
+                            SELECT YEAR(facturas.fecha) as año,  facturas.codigo_postal AS codigo_postal, ROUND(SUM(ventas.importe),2) AS vendido
+                            FROM ventas, facturas
+                            WHERE ventas.num_factura = facturas.num_factura
+                            AND YEAR(facturas.fecha) = "2021"
+                            GROUP BY codigo_postal 
+                            ORDER BY vendido DESC 
+                            LIMIT 10
+                        ) AS veintiuno
+                        UNION
+                        SELECT año, codigo_postal, vendido
+                        FROM (
+                            SELECT YEAR(facturas.fecha) as año,  facturas.codigo_postal AS codigo_postal, ROUND(SUM(ventas.importe),2) AS vendido
+                            FROM ventas, facturas
+                            WHERE ventas.num_factura = facturas.num_factura
+                            AND YEAR(facturas.fecha) = "2022"
+                            GROUP BY codigo_postal 
+                            ORDER BY vendido DESC 
+                            LIMIT 10
+                        ) AS veintidos;""")
     productos = cursor.fetchall()
     cursor.close()
 
