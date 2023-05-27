@@ -7,7 +7,7 @@ conexion = mysql.connector.connect(
     host="localhost",
     user="root",
     password="",
-    database="bodegas_alianza"
+    database="bodegas_alianza_bda"
 )
 
 def TotalVentasAnuales():
@@ -57,12 +57,13 @@ def TotalVentasMensuales():
 
 def TodosLosProductos():
     cursor = conexion.cursor()
-    cursor.execute(""" SELECT YEAR(facturas.fecha) AS año, articulos.descripcion AS producto,ROUND(SUM(ventas.importe),2) AS total
+    consulta = """ SELECT YEAR(facturas.fecha) AS año, articulos.descripcion AS producto,ROUND(SUM(ventas.importe),2) AS total
                         FROM facturas, ventas, articulos
                         WHERE facturas.num_factura = ventas.num_factura
                         AND ventas.id_articulo = articulos.id_articulo
                         GROUP BY YEAR(facturas.fecha), articulos.descripcion
-                        ORDER BY articulos.descripcion, YEAR(facturas.fecha);""")
+                        ORDER BY articulos.descripcion, YEAR(facturas.fecha);"""
+    cursor.execute(consulta)
     productos = cursor.fetchall()
     cursor.close()
 
@@ -86,7 +87,7 @@ def TodosLosProductos():
                 
 def Top10Productos():
     cursor = conexion.cursor()
-    cursor.execute(""" SELECT año, producto, total
+    consulta = """ SELECT año, producto, total
                         FROM (
                             SELECT YEAR(facturas.fecha) AS año,
                                 articulos.descripcion AS producto,
@@ -98,7 +99,8 @@ def Top10Productos():
                             GROUP BY YEAR(facturas.fecha), articulos.descripcion
                         ) subquery
                         WHERE rn <= 10
-                        ORDER BY año, total DESC;""")
+                        ORDER BY año, total DESC;"""
+    cursor.execute(consulta)
     productos = cursor.fetchall()
     cursor.close()
 
@@ -123,7 +125,7 @@ def Top10Productos():
 
 def codigosPostales():
     cursor = conexion.cursor()
-    cursor.execute(""" SELECT año, codigo_postal, vendido
+    consulta = """ SELECT año, codigo_postal, vendido
                         FROM (
                             SELECT YEAR(facturas.fecha) as año,  facturas.codigo_postal AS codigo_postal, ROUND(SUM(ventas.importe),2) AS vendido
                             FROM ventas, facturas
@@ -154,7 +156,8 @@ def codigosPostales():
                             GROUP BY codigo_postal 
                             ORDER BY vendido DESC 
                             LIMIT 10
-                        ) AS veintidos;""")
+                        ) AS veintidos;"""
+    cursor.execute(consulta)
     productos = cursor.fetchall()
     cursor.close()
 
