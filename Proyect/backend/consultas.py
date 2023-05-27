@@ -7,7 +7,7 @@ conexion = mysql.connector.connect(
     host="localhost",
     user="root",
     password="",
-    database="bodegas_alianza_bda"
+    database="bodegas_alianza"
 )
 
 def TotalVentasAnuales():
