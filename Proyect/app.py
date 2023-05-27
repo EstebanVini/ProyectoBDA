@@ -19,11 +19,11 @@ app.add_middleware(
 
 @app.get("/logo")
 async def logo():
-    return FileResponse("Proyect/logo.png")
+    return FileResponse("logo.png")
 
 @app.get("/")
 async def root():
-    return FileResponse("Proyect/index.html")
+    return FileResponse("index.html")
 
 @app.get("/ventasAnuales")
 async def ventasAnuales():
